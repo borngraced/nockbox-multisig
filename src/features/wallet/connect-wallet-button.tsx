@@ -48,17 +48,15 @@ export function ConnectWalletButton() {
         <FlaskConical className="h-4 w-4" />
         <span className="hidden md:inline">Test Mode</span>
       </Button>
-      {isExtensionInstalled() && (
-        <Button
-          onClick={connect}
-          loading={isConnecting}
-          variant={hasError ? "destructive" : "primary"}
-          className="gap-2"
-        >
-          <Wallet className="h-4 w-4" />
-          <span className="hidden md:inline">{isConnecting ? "Connecting..." : "Connect"}</span>
-        </Button>
-      )}
+      <Button
+        onClick={connect}
+        loading={isConnecting}
+        variant={hasError ? "destructive" : "primary"}
+        className="gap-2"
+      >
+        <Wallet className="h-4 w-4" />
+        <span className="hidden md:inline">{isConnecting ? "Connecting..." : "Connect"}</span>
+      </Button>
     </div>
   );
 }

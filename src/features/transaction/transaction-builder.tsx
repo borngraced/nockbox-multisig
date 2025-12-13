@@ -76,7 +76,7 @@ export function TransactionBuilder({
   if (!isConnected) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="h-14 w-14 bg-tertiary flex items-center justify-center mb-4">
+        <div className="h-14 w-14 bg-tertiary rounded-xl flex items-center justify-center mb-4">
           <svg
             className="h-7 w-7 text-muted"
             fill="none"
