@@ -131,6 +131,9 @@ export class WalletService implements IWalletService {
             originPage: note.originPage,
           };
 
+          // We store noteHash as a string here because calling note.hash() on
+          // notes deserialized from protobuf later may fail. By storing it now,
+          // we can use new wasm.Digest(noteHash) instead when building transactions.
           walletNotes.push({
             noteProtobuf: noteEntry.note,
             spendConditionProtobuf,

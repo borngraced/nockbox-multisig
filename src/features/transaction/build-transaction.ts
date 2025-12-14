@@ -336,6 +336,9 @@ export async function buildTransaction(
   if (!txBuilderResult.ok) return txBuilderResult;
   const txBuilder = txBuilderResult.value;
 
+  // Change (refund) goes back to the same multisig lock.
+  // This ensures leftover funds remain under M-of-N control rather than
+  // being sent to a single signer, which would be a security issue.
   const refundLockResult = tryWasm(
     () =>
       wasm.SpendCondition.newPkh(
@@ -359,6 +362,8 @@ export async function buildTransaction(
     if (!spendBuilderResult.ok) return spendBuilderResult;
     const spendBuilder = spendBuilderResult.value;
 
+    // Seeds (outputs) are only added to the first spend. Other input notes
+    // just contribute to the total with their refunds computed separately.
     if (i === 0) {
       for (const output of draft.outputs) {
         const recipientPkhResult = tryWasm(
@@ -373,6 +378,8 @@ export async function buildTransaction(
         );
         if (!recipientSpendConditionResult.ok) return recipientSpendConditionResult;
 
+        // Seed expects a digest (lock hash), not a raw address.
+        // firstName() gives us the lock hash for the recipient's spend condition.
         const recipientDigestResult = tryWasm(
           () => recipientSpendConditionResult.value.firstName(),
           "Failed to get recipient firstName",
@@ -385,6 +392,9 @@ export async function buildTransaction(
         );
         if (!parentHashResult.ok) return parentHashResult;
 
+        // include_lock_data=false: We don't add %lock key to note-data.
+        // Setting true would cost 1 << 15 nicks and is only needed if
+        // recipients need to inspect the lock structure on-chain.
         const seedResult = tryWasm(
           () =>
             wasm.Seed.newSinglePkh(
@@ -427,6 +437,9 @@ export async function buildTransaction(
     if (!addSpendResult.ok) return addSpendResult;
   }
 
+  // We use build() instead of validate() because validate() is stricter:
+  // it expects signatures and checks fees. For unsigned multisig transactions
+  // that will be signed later by co-signers, validate() would fail.
   const nockchainTxResult = tryWasm(
     () => txBuilder.build(),
     "Failed to build transaction",
