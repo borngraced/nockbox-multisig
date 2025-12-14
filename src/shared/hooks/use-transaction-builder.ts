@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useRef } from "react";
-import { useWallet, useWalletStore } from "@/features/wallet";
+import { useWallet } from "@/features/wallet";
 import { Nicks } from "@/shared/types";
 import { useTransactionStore } from "./transaction-store";
 import { isValidPkh } from "@/features/transaction/build-transaction";
@@ -32,14 +32,11 @@ export function useTransactionBuilder() {
     buildTransaction,
     addSignature,
     removePendingTransaction,
-    setMultisigFromAccount,
   } = useTransactionStore();
 
   const { notes, isConnected, connection } = useWallet();
-  const activeMultisig = useWalletStore((state) => state.activeMultisig);
 
   const prevPkhRef = useRef<string | null>(null);
-  const prevMultisigRef = useRef<string | null>(null);
 
   useEffect(() => {
     const currentPkh = connection?.pkh ?? null;
@@ -61,17 +58,6 @@ export function useTransactionBuilder() {
     draft.inputs.length,
     setAvailableNotes,
   ]);
-
-  useEffect(() => {
-    const currentMultisigHash = activeMultisig?.lockHash ?? null;
-
-    if (currentMultisigHash !== prevMultisigRef.current) {
-      prevMultisigRef.current = currentMultisigHash;
-      if (activeMultisig) {
-        setMultisigFromAccount(activeMultisig.threshold, activeMultisig.signerPkhs);
-      }
-    }
-  }, [activeMultisig, setMultisigFromAccount]);
 
   const selectedInputs = useMemo(
     () => draft.inputs.filter((input) => input.selected),
@@ -218,7 +204,6 @@ export function useTransactionBuilder() {
     buildError,
     isBuilding,
     isConnected,
-    activeMultisig,
     selectedInputs,
     totalInputAmount,
     totalOutputAmount,

@@ -28,11 +28,9 @@ export function TransactionBuilder({
     isConnected,
     isBuilding,
     buildError,
-    activeMultisig,
     nextStep,
     prevStep,
     buildTransaction,
-    setStep,
   } = useTransactionBuilder();
 
   const isLastStep = step === "review";
@@ -43,19 +41,13 @@ export function TransactionBuilder({
       if (result) {
         onBuildComplete?.();
       }
-    } else if (step === "outputs" && activeMultisig) {
-      setStep("review");
     } else {
       nextStep();
     }
   };
 
   const handlePrev = () => {
-    if (step === "review" && activeMultisig) {
-      setStep("outputs");
-    } else {
-      prevStep();
-    }
+    prevStep();
   };
 
   const renderStep = () => {
@@ -101,7 +93,7 @@ export function TransactionBuilder({
 
   return (
     <div>
-      <StepIndicator currentStep={step} skipMultisig={!!activeMultisig} />
+      <StepIndicator currentStep={step} />
 
       <div className="min-h-[360px]">{renderStep()}</div>
 

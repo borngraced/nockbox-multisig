@@ -1,12 +1,12 @@
 import { useCallback, useState } from "react";
-import { wasm } from "@/shared/lib/wasm";
+import { wasm } from "@/shared/lib";
 import { useWallet, getWalletService, useWalletStore } from "@/features/wallet";
 import { useTransactionStore } from "@/shared/hooks/transaction-store";
 import {
   simulateTransaction,
   parseWasmError,
 } from "@/features/transaction/build-transaction";
-import type { PendingTransaction } from "@/shared/types/types";
+import type { PendingTransaction } from "@/shared/types";
 
 export type BroadcastStatus =
   | "idle"
@@ -292,7 +292,6 @@ export function useSigning() {
 
       const isTestMode = useWalletStore.getState().isTestMode;
 
-      // Step 1: Simulate transaction
       setBroadcastState({
         txId,
         status: "simulating",

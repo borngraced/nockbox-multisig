@@ -1,7 +1,6 @@
 import { create } from "zustand";
-import { wasm } from "@/shared/lib/wasm";
-import type { Digest } from "@/shared/types";
-import { type TransactionInput, createEmptyDraft } from "@/shared/types/types";
+import { wasm } from "@/shared/lib";
+import { type Digest, type TransactionInput, createEmptyDraft } from "@/shared/types";
 import type { ConnectionInfo, WalletError } from "./types";
 import { getWalletService } from "./wallet-service";
 import { useTransactionStore } from "@/shared/hooks/transaction-store";
@@ -21,13 +20,6 @@ export interface WalletNote {
 	spendConditionProtobuf: Uint8Array;
 	noteHash: string;
 	display: NoteDisplayData;
-}
-
-export interface MultisigAccount {
-	name: string;
-	threshold: number;
-	signerPkhs: string[];
-	lockHash: string; // The first_name derived from the multisig lock
 }
 
 export function getNote(wn: WalletNote): InstanceType<typeof wasm.Note> {
@@ -74,13 +66,8 @@ export function createMultisigSpendCondition(
 	return spendCondition.toProtobuf();
 }
 
-function createTestNotes(multisig?: MultisigAccount): WalletNote[] {
-	const spendCondition = multisig
-		? wasm.SpendCondition.newPkh(
-				new wasm.Pkh(BigInt(multisig.threshold), multisig.signerPkhs),
-			)
-		: wasm.SpendCondition.newPkh(wasm.Pkh.single(TEST_PKH));
-
+function createTestNotes(): WalletNote[] {
+	const spendCondition = wasm.SpendCondition.newPkh(wasm.Pkh.single(TEST_PKH));
 	const firstName = spendCondition.firstName().value;
 
 	const createNoteWithCondition = (
@@ -128,22 +115,12 @@ interface WalletStore {
 	notes: WalletNote[];
 	error: WalletError | null;
 	isTestMode: boolean;
-	activeMultisig: MultisigAccount | null;
-	savedMultisigs: MultisigAccount[];
 
 	connect: () => Promise<void>;
 	disconnect: () => void;
 	fetchNotes: (lockDigest: Digest) => Promise<void>;
 	clearError: () => void;
 	useTestMode: () => void;
-
-	createMultisigAccount: (
-		name: string,
-		threshold: number,
-		signerPkhs: string[],
-	) => MultisigAccount;
-	setActiveMultisig: (multisig: MultisigAccount | null) => Promise<void>;
-	removeMultisigAccount: (lockHash: string) => Promise<void>;
 }
 
 export const useWalletStore = create<WalletStore>()((set, get) => ({
@@ -152,8 +129,6 @@ export const useWalletStore = create<WalletStore>()((set, get) => ({
 	notes: [],
 	error: null,
 	isTestMode: false,
-	activeMultisig: null,
-	savedMultisigs: [],
 
 	connect: async () => {
 		if (get().status === "connecting") return;
@@ -189,7 +164,6 @@ export const useWalletStore = create<WalletStore>()((set, get) => ({
 			notes: [],
 			error: null,
 			isTestMode: false,
-			activeMultisig: null,
 		});
 
 		useTransactionStore.setState({
@@ -225,62 +199,5 @@ export const useWalletStore = create<WalletStore>()((set, get) => ({
 			error: null,
 			isTestMode: true,
 		});
-	},
-
-	createMultisigAccount: (
-		name: string,
-		threshold: number,
-		signerPkhs: string[],
-	) => {
-		const lockHash = computeMultisigLockHash(threshold, signerPkhs);
-		const multisig: MultisigAccount = {
-			name,
-			threshold,
-			signerPkhs,
-			lockHash,
-		};
-
-		const { savedMultisigs } = get();
-		if (!savedMultisigs.find((m) => m.lockHash === lockHash)) {
-			set({ savedMultisigs: [...savedMultisigs, multisig] });
-		}
-
-		return multisig;
-	},
-
-	setActiveMultisig: async (multisig: MultisigAccount | null) => {
-		const { isTestMode } = get();
-		set({ activeMultisig: multisig, notes: [] });
-
-		if (isTestMode) {
-			const testNotes = createTestNotes(multisig ?? undefined);
-			set({ notes: testNotes });
-		} else if (multisig) {
-			await get().fetchNotes(multisig.lockHash as Digest);
-		} else {
-			const { connection } = get();
-			if (connection) {
-				await get().fetchNotes(connection.pkh);
-			}
-		}
-	},
-
-	removeMultisigAccount: async (lockHash: string) => {
-		const { savedMultisigs, activeMultisig, isTestMode, connection } = get();
-		const isRemovingActive = activeMultisig?.lockHash === lockHash;
-
-		set({
-			savedMultisigs: savedMultisigs.filter((m) => m.lockHash !== lockHash),
-			activeMultisig: isRemovingActive ? null : activeMultisig,
-		});
-
-		if (isRemovingActive) {
-			if (isTestMode) {
-				const testNotes = createTestNotes();
-				set({ notes: testNotes });
-			} else if (connection) {
-				await get().fetchNotes(connection.pkh);
-			}
-		}
 	},
 }));

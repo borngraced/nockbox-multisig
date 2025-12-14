@@ -4,13 +4,8 @@ import {
   getSpendCondition,
   type WalletNote,
 } from "@/features/wallet/wallet-store";
-import { Result } from "@/shared/lib/result";
-import { wasm } from "@/shared/lib/wasm";
-import type { Nicks } from "@/shared/types";
-import type {
-  PendingTransaction,
-  TransactionDraft,
-} from "@/shared/types/types";
+import { Result, wasm } from "@/shared/lib";
+import type { Nicks, PendingTransaction, TransactionDraft } from "@/shared/types";
 
 export interface BuildTransactionResult {
   txHash: string;

@@ -1,5 +1,5 @@
 import type { Digest } from '@/shared/types';
-import type { Result } from '@/shared/lib/result';
+import type { Result } from '@/shared/lib';
 import type { WalletNote } from './wallet-store';
 
 export interface ConnectionInfo {

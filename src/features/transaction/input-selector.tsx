@@ -9,6 +9,7 @@ export function InputSelector() {
     draft,
     selectedInputs,
     totalInputAmount,
+    isConnected,
     toggleNoteSelection,
     selectAllNotes,
     deselectAllNotes,
@@ -43,9 +44,13 @@ export function InputSelector() {
           <div className="h-14 w-14 bg-tertiary flex items-center justify-center mb-4 rounded-xl">
             <Coins className="h-6 w-6 text-muted" />
           </div>
-          <p className="text-secondary font-medium">No notes available</p>
+          <p className="text-secondary font-medium">
+            {isConnected ? 'No balance' : 'No notes available'}
+          </p>
           <p className="text-sm text-muted mt-1 max-w-xs">
-            Connect your wallet to see available notes
+            {isConnected
+              ? 'This wallet has no spendable notes. Try a different account or fund this wallet first.'
+              : 'Connect your wallet to see available notes'}
           </p>
         </div>
       ) : (

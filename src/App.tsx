@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Menu, X, Hammer, PenTool, Clock } from 'lucide-react';
-import { ConnectWalletButton, WalletStatus, MultisigAccountManager } from '@/features/wallet';
+import { ConnectWalletButton, WalletStatus } from '@/features/wallet';
 import { TransactionBuilder } from '@/features/transaction';
 import { SigningFlow } from '@/features/signing';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components';
@@ -22,10 +22,10 @@ const guideContent: Record<AppView, { title: string; steps: string[] }> = {
   build: {
     title: 'Building a Transaction',
     steps: [
-      'Create or select a multisig account (threshold + signers)',
-      'Select notes (UTXOs) belonging to the multisig',
-      'Add one or more recipients with amounts',
-      'Review and build the unsigned transaction',
+      'Select notes (UTXOs) to spend',
+      'Add recipients with amounts',
+      'Configure multisig (threshold + signers)',
+      'Review and build the transaction',
     ],
   },
   sign: {
@@ -255,8 +255,6 @@ function AppContent() {
 
           <div className="lg:col-span-4 space-y-6">
             <WalletStatus />
-
-            <MultisigAccountManager />
 
             <QuickGuide view={view} />
           </div>

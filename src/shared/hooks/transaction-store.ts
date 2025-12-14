@@ -53,7 +53,6 @@ interface TransactionStore {
     updates: Partial<Omit<SignerConfig, "id">>,
   ) => void;
   removeSigner: (id: string) => void;
-  setMultisigFromAccount: (threshold: number, signerPkhs: string[]) => void;
 
   setFeePerWord: (fee: Nicks) => void;
   reset: () => void;
@@ -256,24 +255,6 @@ export const useTransactionStore = create<TransactionStore>()((set, get) => ({
             draft.multisigConfig.threshold,
             newSigners.length,
           ),
-        },
-      },
-    });
-  },
-
-  setMultisigFromAccount: (threshold, signerPkhs) => {
-    const { draft } = get();
-    const signers: SignerConfig[] = signerPkhs.map((pkh, index) => ({
-      id: generateSignerId(),
-      publicKeyHash: pkh,
-      label: `Signer ${index + 1}`,
-    }));
-    set({
-      draft: {
-        ...draft,
-        multisigConfig: {
-          threshold,
-          signers,
         },
       },
     });

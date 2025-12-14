@@ -24,31 +24,23 @@ For a multisig lock (e.g., 2-of-3):
 ## Usage Flow
 
 ### 1. Connect Wallet
-- Click "Connect Wallet" to connect Iris Wallet extension(not tested with real funds atleast!!!)
+- Click "Connect Wallet" to connect Iris Wallet extension
 - Or use "Test Mode" for development/testing
 
-### 2. Create/Select Multisig Account
-- Expand "Multisig Accounts" in the sidebar
-- Click "Create Multisig Account"
-- Enter:
-  - **Name**: Friendly name (e.g., "Treasury")
-  - **Threshold**: Number of signatures required (M)
-  - **Signers**: Public key hashes of all signers (N)
-- The app computes the lock hash and fetches notes for that multisig
-
-### 3. Build Transaction
-- **Step 1 - Inputs**: Select notes (UTXOs) to spend from the multisig
-- **Step 2 - Outputs**: Add recipient addresses and amounts
-- **Step 3 - Review**: Verify transaction details (multisig signers are auto-populated)
+### 2. Build Transaction
+- **Inputs**: Select notes (UTXOs) to spend
+- **Outputs**: Add recipient addresses and amounts
+- **Multisig**: Configure threshold and signer PKHs
+- **Review**: Verify transaction details
 - Click "Build & Sign" to create the transaction
 
-### 4. Sign Transaction
+### 3. Sign Transaction
 - The transaction appears in the "Sign" tab
 - If you're a configured signer, click "Sign" to add your signature
 - **Export** the transaction to share with co-signers
 - Co-signers import and add their signatures
 
-### 5. Broadcast
+### 4. Broadcast
 - Once threshold signatures are collected, the "Broadcast" button enables
 - Click to submit the transaction to the network
 
@@ -56,8 +48,8 @@ For a multisig lock (e.g., 2-of-3):
 
 Test mode allows development without the Iris Wallet extension:
 - Creates mock notes for testing
-- When a multisig account is active, test notes belong to that multisig lock
 - Signatures are simulated (random bytes)
+- Broadcasts are simulated
 
 ## Tech Stack
 

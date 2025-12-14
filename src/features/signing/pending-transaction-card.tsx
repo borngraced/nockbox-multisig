@@ -17,8 +17,7 @@ import {
 import { useState } from "react";
 import { Button, Card, CardContent, CardHeader } from "@/shared/components";
 import { cn } from "@/shared/lib/cn";
-import { Nicks } from "@/shared/types";
-import type { PendingTransaction } from "@/shared/types/types";
+import { Nicks, type PendingTransaction } from "@/shared/types";
 import { SignatureProgress } from "./signature-progress";
 import type { BroadcastState } from "./use-signing";
 

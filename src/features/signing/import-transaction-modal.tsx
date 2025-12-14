@@ -8,9 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components";
-import type { Nicks } from "@/shared/types";
+import type { Nicks, PendingTransaction } from "@/shared/types";
 import { useTransactionStore } from "@/shared/hooks/transaction-store";
-import type { PendingTransaction } from "@/shared/types/types";
 
 interface ImportTransactionModalProps {
   open: boolean;

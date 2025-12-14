@@ -1,6 +1,5 @@
 import { NockchainProvider } from '@nockbox/iris-sdk';
-import { wasm } from '@/shared/lib/wasm';
-import { Result } from '@/shared/lib/result';
+import { wasm, Result } from '@/shared/lib';
 import type { Digest } from '@/shared/types';
 import type { IWalletService, ConnectionInfo, SigningMetadata, WalletError } from './types';
 import { createWalletError } from './types';

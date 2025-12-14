@@ -11,4 +11,4 @@ export type {
   SignerConfig,
   TransactionDraft,
   TransactionBuilderStep,
-} from "../../shared/types/types";
+} from "@/shared/types";
