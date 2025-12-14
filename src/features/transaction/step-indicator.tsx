@@ -29,7 +29,7 @@ export function StepIndicator({ currentStep, skipMultisig = false }: StepIndicat
           <button
             key={step.key}
             className={cn(
-              'px-4 py-2 text-sm font-medium transition-all',
+              'px-4 py-2 text-sm font-medium transition-all rounded-lg',
               isCurrent && 'bg-[var(--color-accent)] text-[var(--color-bg)]',
               isCompleted && 'bg-tertiary text-accent',
               !isCompleted && !isCurrent && 'bg-tertiary text-muted'

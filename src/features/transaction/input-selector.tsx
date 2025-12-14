@@ -49,7 +49,7 @@ export function InputSelector() {
           </p>
         </div>
       ) : (
-        <div className="space-y-2 max-h-72 overflow-y-auto scrollbar-thin pr-1 animate-stagger">
+        <div className="space-y-2 max-h-72 overflow-y-auto overflow-x-visible scrollbar-thin p-1 animate-stagger">
           {draft.inputs.map((input, index) => (
             <button
               key={`${input.nameFirst}-${input.nameLast}-${index}`}
