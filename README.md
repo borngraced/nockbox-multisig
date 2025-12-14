@@ -20,7 +20,7 @@ For a multisig lock (e.g., 2-of-3):
 ## Usage Flow
 
 ### 1. Connect Wallet
-- Click "Connect Wallet" to connect Iris Wallet extension(not tested!!!)
+- Click "Connect Wallet" to connect Iris Wallet extension(not tested with real funds atleast!!!)
 - Or use "Test Mode" for development/testing
 
 ### 2. Create/Select Multisig Account
