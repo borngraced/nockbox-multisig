@@ -237,9 +237,6 @@ export function useSigning() {
           txHash: tx.txHash,
           rawTxJam: Array.from(tx.rawTxJam),
           signedTx: tx.signedTx ? Array.from(tx.signedTx) : null,
-          // noteProtobufs and spendConditionProtobufs are included because
-          // co-signers don't have the original notes in their wallet.
-          // They need these protobufs to sign the transaction.
           noteProtobufs: tx.noteProtobufs.map((p) => Array.from(p)),
           spendConditionProtobufs: tx.spendConditionProtobufs.map((p) =>
             Array.from(p),

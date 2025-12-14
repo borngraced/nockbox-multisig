@@ -4,31 +4,31 @@ Why do we skip TxBuilder.validate() and only call build()?
 - validate() is stricter, expects signatures, checks fees
 - build() just constructs the transaction
 - For unsigned multisig transactions, validate() would fail
-- [build-transaction.ts#L439](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L439)
+- [build-transaction.ts#L358](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L358)
 
 Why do we store noteHash instead of calling note.hash()?
 - Calling note.hash() on notes deserialized from protobuf may fail
 - We store noteHash string when first receiving the note
 - Then use new wasm.Digest(noteHash) instead
-- [wallet-service.ts#L133-L139](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/wallet/wallet-service.ts#L133-L139)
+- [wallet-service.ts#L133-L137](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/wallet/wallet-service.ts#L133-L137)
 
 Why is recipientDigest the firstName() of spend condition?
 - The seed expects a digest, not a raw address
 - firstName() gives us the lock hash for the recipient
-- [build-transaction.ts#L377-L382](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L377-L382)
+- [build-transaction.ts#L312-L315](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L312-L315)
 
 Why are seeds only added to the first spend?
 - All outputs go on first spend
 - Other input notes just contribute to total with refunds computed
 - iris-wasm merges all refunds with the same lock into one output automatically
-- [build-transaction.ts#L360](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L360)
+- [build-transaction.ts#L298](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L298)
 
 Why does isBalanced() fail on subsequent spends?
 - isBalanced() checks: note.assets == seeds + fee
 - Subsequent spends have no seeds (all on first spend), so: input != 0 + fee
 - isBalanced() is only required for validate(), not build()
 - Fix: Skip isBalanced() check, use computeRefund() + build() only
-- [build-transaction.ts#L413-L425](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L413-L425)
+- [build-transaction.ts#L344-L355](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L344-L355)
 
 Why does setFeeAndBalanceRefund() fail for multi-input?
 - It expects an internal note pool (used by simpleSpend)
@@ -38,14 +38,14 @@ Why does setFeeAndBalanceRefund() fail for multi-input?
 Why do we include noteProtobufs in export?
 - Co-signers don't have original notes in their wallet
 - They need the protobufs to sign the transaction
-- [use-signing.ts#L243](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/signing/use-signing.ts#L243)
+- [use-signing.ts#L240](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/signing/use-signing.ts#L240)
 
 When should include_lock_data be true?
 - It adds %lock key to note-data
 - Costs 1 << 15 nicks
 - Only needed if recipients need to inspect lock structure on-chain
 - Currently set to false (correct for standard transfers)
-- [build-transaction.ts#L390](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L390)
+- [build-transaction.ts#L324-L331](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L324-L331)
 
 Should we use simpleSpend instead of manual SpendBuilder?
 - iris-wasm: "It is HIGHLY recommended to not mix simpleSpend with other types of spends"

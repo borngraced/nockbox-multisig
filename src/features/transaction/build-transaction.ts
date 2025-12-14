@@ -31,86 +31,26 @@ export interface SimulationResult {
   warnings: string[];
 }
 
-function createError(
+const createError = (
   code: TransactionBuildError["code"],
   message: string,
   details?: string,
-): TransactionBuildError {
-  const error: TransactionBuildError = { code, message };
-  if (details !== undefined) {
-    error.details = details;
-  }
-  return error;
-}
+): TransactionBuildError => ({ code, message, ...(details && { details }) });
 
 function parseWasmError(error: unknown): { message: string; details: string } {
   const rawMessage = error instanceof Error ? error.message : String(error);
 
-  const errorMappings: Array<{ pattern: RegExp; message: string }> = [
-    {
-      pattern: /insufficient.*funds?/i,
-      message: "Insufficient funds to complete this transaction",
-    },
-    {
-      pattern: /invalid.*signature/i,
-      message: "One or more signatures are invalid",
-    },
-    {
-      pattern: /invalid.*address|invalid.*pkh/i,
-      message: "Invalid recipient address format",
-    },
-    {
-      pattern: /duplicate.*input|double.*spend/i,
-      message: "Transaction contains duplicate inputs (potential double-spend)",
-    },
-    {
-      pattern: /overflow/i,
-      message: "Transaction amount exceeds maximum allowed value",
-    },
-    {
-      pattern: /underflow/i,
-      message: "Transaction would result in negative balance",
-    },
-    {
-      pattern: /invalid.*fee/i,
-      message: "Transaction fee is invalid or too low",
-    },
-    {
-      pattern: /malformed|parse.*error|deserialize/i,
-      message: "Transaction data is malformed or corrupted",
-    },
-    {
-      pattern: /lock.*hash|spend.*condition/i,
-      message: "Invalid lock or spend condition configuration",
-    },
-    {
-      pattern: /threshold/i,
-      message: "Signature threshold configuration is invalid",
-    },
-    {
-      pattern: /timeout|network/i,
-      message: "Network timeout - please try again",
-    },
-    {
-      pattern: /not.*found/i,
-      message: "Referenced note or resource not found on chain",
-    },
-    {
-      pattern: /already.*spent/i,
-      message: "One or more notes have already been spent",
-    },
-  ];
-
-  for (const { pattern, message } of errorMappings) {
-    if (pattern.test(rawMessage)) {
-      return { message, details: rawMessage };
-    }
+  if (/insufficient.*funds?/i.test(rawMessage)) {
+    return { message: "Insufficient funds", details: rawMessage };
+  }
+  if (/invalid.*signature/i.test(rawMessage)) {
+    return { message: "Invalid signature", details: rawMessage };
+  }
+  if (/already.*spent|double.*spend/i.test(rawMessage)) {
+    return { message: "Note already spent", details: rawMessage };
   }
 
-  return {
-    message: "Transaction operation failed",
-    details: rawMessage,
-  };
+  return { message: "Transaction failed", details: rawMessage };
 }
 
 function tryWasm<T>(
@@ -331,9 +271,7 @@ export async function buildTransaction(
   if (!txBuilderResult.ok) return txBuilderResult;
   const txBuilder = txBuilderResult.value;
 
-  // Change (refund) goes back to the same multisig lock.
-  // This ensures leftover funds remain under M-of-N control rather than
-  // being sent to a single signer, which would be a security issue.
+  // Refund goes back to multisig lock
   const refundLockResult = tryWasm(
     () =>
       wasm.SpendCondition.newPkh(
@@ -357,8 +295,6 @@ export async function buildTransaction(
     if (!spendBuilderResult.ok) return spendBuilderResult;
     const spendBuilder = spendBuilderResult.value;
 
-    // Seeds (outputs) are only added to the first spend. Other input notes
-    // just contribute to the total with their refunds computed separately.
     if (i === 0) {
       for (const output of draft.outputs) {
         const recipientPkhResult = tryWasm(
@@ -373,8 +309,6 @@ export async function buildTransaction(
         );
         if (!recipientSpendConditionResult.ok) return recipientSpendConditionResult;
 
-        // Seed expects a digest (lock hash), not a raw address.
-        // firstName() gives us the lock hash for the recipient's spend condition.
         const recipientDigestResult = tryWasm(
           () => recipientSpendConditionResult.value.firstName(),
           "Failed to get recipient firstName",
@@ -387,9 +321,6 @@ export async function buildTransaction(
         );
         if (!parentHashResult.ok) return parentHashResult;
 
-        // include_lock_data=false: We don't add %lock key to note-data.
-        // Setting true would cost 1 << 15 nicks and is only needed if
-        // recipients need to inspect the lock structure on-chain.
         const seedResult = tryWasm(
           () =>
             wasm.Seed.newSinglePkh(
@@ -410,8 +341,6 @@ export async function buildTransaction(
       }
     }
 
-    // Compute refund for this spend. For multi-input transactions,
-    // subsequent spends (with no seeds) will have their full balance as refund.
     const computeRefundResult = tryWasm(
       () => spendBuilder.computeRefund(false),
       `Failed to compute refund for note ${i}`,
@@ -425,9 +354,6 @@ export async function buildTransaction(
     if (!addSpendResult.ok) return addSpendResult;
   }
 
-  // We use build() instead of validate() because validate() is stricter:
-  // it expects signatures and checks fees. For unsigned multisig transactions
-  // that will be signed later by co-signers, validate() would fail.
   const nockchainTxResult = tryWasm(
     () => txBuilder.build(),
     "Failed to build transaction",
