@@ -48,10 +48,15 @@ export function WalletStatus() {
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted">Address</span>
-            <button className="flex items-center gap-1 text-secondary hover:text-accent transition-all duration-200 font-mono text-xs hover:scale-105">
+            <a
+              href={`https://nockscan.app/address/${connection.pkh}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-secondary hover:text-accent transition-all duration-200 font-mono text-xs hover:scale-105"
+            >
               {(connection.pkh as string).slice(0, 8)}...{(connection.pkh as string).slice(-6)}
               <ExternalLink className="h-3 w-3" />
-            </button>
+            </a>
           </div>
         </div>
 
