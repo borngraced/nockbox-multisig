@@ -12,7 +12,6 @@ export function ConnectWalletButton() {
     formattedBalance,
     connect,
     disconnect,
-    isExtensionInstalled,
     useTestMode,
   } = useWallet();
 
