@@ -410,20 +410,13 @@ export async function buildTransaction(
       }
     }
 
+    // Compute refund for this spend. For multi-input transactions,
+    // subsequent spends (with no seeds) will have their full balance as refund.
     const computeRefundResult = tryWasm(
       () => spendBuilder.computeRefund(false),
       `Failed to compute refund for note ${i}`,
     );
     if (!computeRefundResult.ok) return computeRefundResult;
-
-    if (!spendBuilder.isBalanced()) {
-      return Result.err(
-        createError(
-          "BUILD_FAILED",
-          `Spend ${i} is not balanced: input assets do not equal seeds + fee`,
-        ),
-      );
-    }
 
     const addSpendResult = tryWasm(
       () => txBuilder.spend(spendBuilder),

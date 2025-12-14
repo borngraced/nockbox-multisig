@@ -20,7 +20,20 @@ Why is recipientDigest the firstName() of spend condition?
 Why are seeds only added to the first spend?
 - All outputs go on first spend
 - Other input notes just contribute to total with refunds computed
+- iris-wasm merges all refunds with the same lock into one output automatically
 - [build-transaction.ts#L360](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L360)
+
+Why does isBalanced() fail on subsequent spends?
+- isBalanced() checks: note.assets == seeds + fee
+- Subsequent spends have no seeds (all on first spend), so: input != 0 + fee
+- isBalanced() is only required for validate(), not build()
+- Fix: Skip isBalanced() check, use computeRefund() + build() only
+- [build-transaction.ts#L413-L425](https://github.com/borngraced/nockbox-multisig/blob/main/src/features/transaction/build-transaction.ts#L413-L425)
+
+Why does setFeeAndBalanceRefund() fail for multi-input?
+- It expects an internal note pool (used by simpleSpend)
+- Manual SpendBuilder approach doesn't maintain a note pool
+- Fix: Use computeRefund() on each spend instead
 
 Why do we include noteProtobufs in export?
 - Co-signers don't have original notes in their wallet
